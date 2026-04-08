@@ -1085,6 +1085,15 @@
                     <option value="user">User</option>
                 </select>
             </div>
+            <div class="form-group" style="border-top: 1px solid var(--border); padding-top: 15px; margin-top: 15px;">
+                <label>Server IP Address (Central storage)</label>
+                <div style="display:flex;gap:5px">
+                    <input type="text" id="server-ip" placeholder="e.g. 192.168.1.5" style="margin-bottom:0">
+                    <button class="btn btn-outline btn-sm" onclick="checkServer()"
+                        style="white-space:nowrap">Test</button>
+                </div>
+                <small id="server-status" style="display:block;margin-top:5px;font-size:11px"></small>
+            </div>
             <button class="btn btn-primary" onclick="doLogin()">🔐 Sign In</button>
             <div id="login-error" class="error-msg"></div>
             <hr class="sep" style="margin-top:22px">
@@ -1390,33 +1399,275 @@
         let uploads = []; // {id, userId, fileName, fileSize, pages, uploadDate, uploadTime}
         let pendingFiles = { single: [], bulk: [] };
 
-        // Persist to localStorage
-        function saveData() {
-            try {
-                localStorage.setItem('mv_uploads', JSON.stringify(uploads));
-                localStorage.setItem('mv_users', JSON.stringify(USERS));
-            } catch (e) { }
-        }
+        // // ══════════════════════════════════════════════════════════
+        // // CENTRAL SERVER SYNC
+        // // ══════════════════════════════════════════════════════════
+        // let SERVER_URL = localStorage.getItem('mv_server_url') || "";
 
-        function loadData() {
-            try {
-                const u = localStorage.getItem('mv_uploads');
-                if (u) uploads = JSON.parse(u);
-                const s = localStorage.getItem('mv_users');
-                if (s) USERS = JSON.parse(s);
-            } catch (e) { }
+        // async function checkServer() {
+        //     const ip = document.getElementById('server-ip').value.trim();
+        //     const status = document.getElementById('server-status');
+        //     if (!ip) {
+        //         status.textContent = "ℹ️ Using local storage mode";
+        //         status.style.color = "var(--muted)";
+        //         SERVER_URL = "";
+        //         localStorage.removeItem('mv_server_url');
+        //         return true;
+        //     }
+        //     const url = ip.startsWith('http') ? ip : `http://${ip}:3000`;
+        //     status.textContent = "⏳ Checking connection...";
+        //     status.style.color = "var(--accent)";
+        //     try {
+        //         const resp = await fetch(`${url}/api/data`, { signal: AbortSignal.timeout(3000) });
+        //         if (resp.ok) {
+        //             SERVER_URL = url;
+        //             localStorage.setItem('mv_server_url', SERVER_URL);
+        //             status.textContent = "✅ Connected to central server";
+        //             status.style.color = "var(--success)";
+        //             return true;
+        //         }
+        //     } catch (e) {
+        //         status.textContent = "❌ Server not reachable";
+        //         status.style.color = "var(--danger)";
+        //         return false;
+        //     }
+        // }
+
+        // async function saveData() {
+        //     try {
+        //         localStorage.setItem('mv_uploads', JSON.stringify(uploads));
+        //         localStorage.setItem('mv_users', JSON.stringify(USERS));
+
+        //         if (SERVER_URL) {
+        //             // Sync uploads
+        //             for (const upload of uploads) {
+        //                 await fetch(`${SERVER_URL}/api/save-upload`, {
+        //                     method: 'POST',
+        //                     headers: { 'Content-Type': 'application/json' },
+        //                     body: JSON.stringify(upload)
+        //                 });
+        //             }
+        //             // Sync users if admin
+        //             if (currentUser && currentUser.role === 'admin') {
+        //                 await fetch(`${SERVER_URL}/api/save-users`, {
+        //                     method: 'POST',
+        //                     headers: { 'Content-Type': 'application/json' },
+        //                     body: JSON.stringify(USERS)
+        //                 });
+        //             }
+        //         }
+        //     } catch (e) {
+        //         console.error("Sync error:", e);
+        //     }
+        // }
+
+        // async function loadData() {
+        //     if (SERVER_URL) {
+        //         try {
+        //             const resp = await fetch(`${SERVER_URL}/api/data`);
+        //             const data = await resp.json();
+        //             uploads = data.uploads;
+        //             USERS = data.users;
+        //             return;
+        //         } catch (e) {
+        //             console.warn("Failed to load from server, using local storage");
+        //         }
+        //     }
+        //     try {
+        //         const u = localStorage.getItem('mv_uploads');
+        //         if (u) uploads = JSON.parse(u);
+        //         const s = localStorage.getItem('mv_users');
+        //         if (s) USERS = JSON.parse(s);
+        //     } catch (e) { }
+        // }
+
+
+
+
+
+
+
+// ══════════════════════════════════════════════════════════
+// CENTRAL SERVER SYNC
+// ══════════════════════════════════════════════════════════
+let SERVER_URL = localStorage.getItem('mv_server_url') || "";
+let SERVER_CONNECTED = false;
+let SYNC_INTERVAL = null;
+
+async function checkServer() {
+    let ip = document.getElementById('server-ip').value.trim();
+    const status = document.getElementById('server-status');
+    
+    // Sanitize the IP: remove backslashes and any spaces
+    ip = ip.replace(/[\\ ]/g, '');
+    document.getElementById('server-ip').value = ip; // Update UI with sanitized IP
+
+    if (!ip) {
+        status.textContent = "ℹ️ Using local storage mode (data will not sync)";
+        status.style.color = "var(--warn)";
+        SERVER_URL = "";
+        SERVER_CONNECTED = false;
+        localStorage.removeItem('mv_server_url');
+        return false;
+    }
+    
+    let url = ip;
+    if (!url.startsWith('http')) url = 'http://' + url;
+    try {
+        const uObj = new URL(url);
+        if (!uObj.port) uObj.port = "3000";
+        url = uObj.protocol + "//" + uObj.hostname + ":" + uObj.port;
+    } catch (e) { }
+
+    status.textContent = "⏳ Checking connection...";
+    status.style.color = "var(--accent)";
+    
+    try {
+        const resp = await fetch(`${url}/api/health`, { 
+            signal: AbortSignal.timeout(5000) 
+        });
+        if (resp.ok) {
+            SERVER_URL = url;
+            SERVER_CONNECTED = true;
+            localStorage.setItem('mv_server_url', SERVER_URL);
+            status.textContent = "✅ Connected to central server - All data will sync";
+            status.style.color = "var(--success)";
+            
+            // Start auto-sync
+            startAutoSync();
+            return true;
+        } else {
+            throw new Error('Server responded with error');
         }
+    } catch (e) {
+        status.textContent = "❌ Server not reachable. Ensure server.exe is running on the main laptop and you have the correct IP (e.g. 192.168.0.111)";
+        status.style.color = "var(--danger)";
+        SERVER_CONNECTED = false;
+        return false;
+    }
+}
+
+function startAutoSync() {
+    if (SYNC_INTERVAL) clearInterval(SYNC_INTERVAL);
+    
+    // Sync every 30 seconds
+    SYNC_INTERVAL = setInterval(async () => {
+        if (SERVER_CONNECTED && currentUser) {
+            await syncToServer();
+        }
+    }, 30000);
+}
+
+async function syncToServer() {
+    if (!SERVER_URL || !SERVER_CONNECTED) return;
+    
+    try {
+        // Sync uploads
+        const resp = await fetch(`${SERVER_URL}/api/sync-uploads`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uploads })
+        });
+        
+        if (resp.ok) {
+            const data = await resp.json();
+            uploads = data.uploads; // Update with merged data from server
+            localStorage.setItem('mv_uploads', JSON.stringify(uploads));
+        }
+        
+        // Sync users if admin
+        if (currentUser && currentUser.role === 'admin') {
+            await fetch(`${SERVER_URL}/api/save-users`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(USERS)
+            });
+        }
+    } catch (e) {
+        console.warn("Auto-sync failed:", e);
+    }
+}
+
+async function saveData() {
+    try {
+        // Always save to localStorage first
+        localStorage.setItem('mv_uploads', JSON.stringify(uploads));
+        localStorage.setItem('mv_users', JSON.stringify(USERS));
+
+        // If server is connected, sync immediately
+        if (SERVER_URL && SERVER_CONNECTED) {
+            await syncToServer();
+        }
+    } catch (e) {
+        console.error("Save error:", e);
+    }
+}
+
+async function loadData() {
+    if (SERVER_URL && SERVER_CONNECTED) {
+        try {
+            const resp = await fetch(`${SERVER_URL}/api/data`);
+            const data = await resp.json();
+            uploads = data.uploads || [];
+            USERS = data.users || USERS;
+            
+            // Save to localStorage as backup
+            localStorage.setItem('mv_uploads', JSON.stringify(uploads));
+            localStorage.setItem('mv_users', JSON.stringify(USERS));
+            return;
+        } catch (e) {
+            console.warn("Failed to load from server, using local storage");
+        }
+    }
+    
+    // Fallback to localStorage
+    try {
+        const u = localStorage.getItem('mv_uploads');
+        if (u) uploads = JSON.parse(u);
+        const s = localStorage.getItem('mv_users');
+        if (s) USERS = JSON.parse(s);
+    } catch (e) { }
+}
+
+
 
         // ══════════════════════════════════════════════════════════
         // AUTH
         // ══════════════════════════════════════════════════════════
-        function doLogin() {
+        async function doLogin() {
             const u = document.getElementById('login-user').value.trim();
             const p = document.getElementById('login-pass').value;
             const r = document.getElementById('login-role').value;
             const err = document.getElementById('login-error');
             err.textContent = '';
 
+            // Check server connection first if configured
+            if (SERVER_URL) {
+                try {
+                    const resp = await fetch(`${SERVER_URL}/api/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: u, password: p, role: r })
+                    });
+                    if (resp.ok) {
+                        const userData = await resp.json();
+                        currentUser = { username: u, ...userData, enabled: !!userData.enabled };
+                        document.getElementById('auth-screen').style.display = 'none';
+                        document.getElementById('app').style.display = 'block';
+                        initApp();
+                        return;
+                    } else {
+                        const data = await resp.json();
+                        err.textContent = `❌ ${data.error || 'Login failed'}`;
+                        return;
+                    }
+                } catch (e) {
+                    err.textContent = '❌ Central server connection error';
+                    return;
+                }
+            }
+
+            // Fallback to local login
             if (!USERS[u]) { err.textContent = '❌ User not found'; return; }
             if (USERS[u].password !== p) { err.textContent = '❌ Wrong password'; return; }
             if (USERS[u].role !== r) { err.textContent = `❌ This account is not a ${r}`; return; }
@@ -1439,8 +1690,8 @@
         // ══════════════════════════════════════════════════════════
         // APP INIT
         // ══════════════════════════════════════════════════════════
-        function initApp() {
-            loadData();
+        async function initApp() {
+            await loadData();
             // Topbar
             const tb = document.getElementById('tb-username');
             const av = document.getElementById('tb-avatar');
@@ -1601,7 +1852,7 @@
                         uploadTime: now.toTimeString().slice(0, 8),
                         uploadDateTime: now.toISOString()
                     });
-                    saveData();
+                    await saveData();
                     stat.textContent = `✅ ${pages} pages`;
                     stat.className = 'fi-status status-ok';
                     document.querySelector(`#fi-${type}-${i} .fi-meta`).textContent = `${formatSize(f.size)} • ${pages} pages`;
@@ -1857,16 +2108,17 @@
             }).join('');
         }
 
-        function toggleUser(uid) {
+        async function toggleUser(uid) {
             if (uid === 'admin') return;
             USERS[uid].enabled = !USERS[uid].enabled;
-            saveData();
+            await saveData();
             loadUsersPage();
             showToast(`${USERS[uid].displayName} ${USERS[uid].enabled ? 'enabled' : 'disabled'} successfully!`);
         }
 
         // ══════════════════════════════════════════════════════════
         // HELPERS
+
         // ══════════════════════════════════════════════════════════
         function populateUserDropdowns() {
             const opts = ['<option value="">All Users</option>',
@@ -1899,7 +2151,7 @@
             document.getElementById('prof-confirm').value = '';
         }
 
-        function updateProfile() {
+        async function updateProfile() {
             const dn = document.getElementById('prof-displayname').value.trim();
             const un = document.getElementById('prof-username').value.trim();
             const pw = document.getElementById('prof-password').value;
@@ -1923,7 +2175,7 @@
                 // Remove old key, add new key
                 delete USERS[oldUsername];
                 USERS[un] = userData;
-                updateUsernameInUploads(oldUsername, un);
+                await updateUsernameInUploads(oldUsername, un);
                 currentUser.username = un;
             } else {
                 USERS[oldUsername] = userData;
@@ -1932,8 +2184,8 @@
             currentUser.displayName = dn;
             currentUser.role = userData.role;
 
-            saveData();
-            initApp(); // Refresh UI
+            await saveData();
+            await initApp(); // Refresh UI
             showToast('✅ Profile updated successfully!');
         }
 
@@ -1955,7 +2207,7 @@
             document.getElementById('edit-user-modal').style.display = 'none';
         }
 
-        function saveUserEdit() {
+        async function saveUserEdit() {
             const oldUn = document.getElementById('edit-old-username').value;
             const newUn = document.getElementById('edit-username').value.trim();
             const dn = document.getElementById('edit-displayname').value.trim();
@@ -1973,7 +2225,7 @@
             if (newUn !== oldUn) {
                 delete USERS[oldUn];
                 USERS[newUn] = userData;
-                updateUsernameInUploads(oldUn, newUn);
+                await updateUsernameInUploads(oldUn, newUn);
                 // If I edited myself
                 if (currentUser.username === oldUn) currentUser.username = newUn;
             } else {
@@ -1986,13 +2238,13 @@
                 currentUser.role = rl;
             }
 
-            saveData();
+            await saveData();
             closeUserEdit();
-            initApp();
+            await initApp();
             showToast('✅ User updated successfully!');
         }
 
-        function updateUsernameInUploads(oldId, newId) {
+        async function updateUsernameInUploads(oldId, newId) {
             let changed = false;
             uploads.forEach(u => {
                 if (u.userId === oldId) {
@@ -2000,7 +2252,7 @@
                     changed = true;
                 }
             });
-            if (changed) saveData();
+            if (changed) await saveData();
         }
 
         function exportExcel(type) {
@@ -2066,7 +2318,14 @@
         }
 
         // Load data on page start
-        loadData();
+        window.addEventListener('load', async () => {
+            const savedIp = localStorage.getItem('mv_server_url');
+            if (savedIp) {
+                const ipPart = savedIp.replace('http://', '').replace(':3000', '');
+                document.getElementById('server-ip').value = ipPart;
+                await checkServer();
+            }
+        });
     </script>
 </body>
 
