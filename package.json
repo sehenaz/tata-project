@@ -1,23 +1,23 @@
 {
   "name": "tata-project",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Tata Memorial Hospital Scanning & Digitization Utility Tool",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["hospital", "scanning", "digitization"],
+  "author": "Tata Memorial Hospital",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "better-sqlite3": "^12.8.0",
-    "body-parser": "^2.2.2",
-    "cors": "^2.8.6",
-    "express": "^5.2.1"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2"
   },
   "devDependencies": {
-    "electron": "^41.1.1",
-    "electron-builder": "^26.8.1"
+    "pkg": "^5.8.1"
   }
 }
