@@ -1,0 +1,20 @@
+{
+  "admin": {
+    "password": "admin123",
+    "role": "admin",
+    "enabled": true,
+    "displayName": "Admin"
+  },
+  "user1": {
+    "password": "user123",
+    "role": "user",
+    "enabled": true,
+    "displayName": "User One"
+  },
+  "user2": {
+    "password": "user123",
+    "role": "user",
+    "enabled": true,
+    "displayName": "User Two"
+  }
+}

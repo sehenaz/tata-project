@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TMH Server Connector</title>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #1a3a6e, #2563eb); display:flex; align-items:center; justify-content:center; min-height:100vh; }
+  .card { background:#fff; border-radius:20px; padding:40px 36px; max-width:480px; width:93%; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
+  .logo { text-align:center; margin-bottom:24px; }
+  .logo h2 { color:#1a3a6e; font-size:20px; margin-top:10px; }
+  .logo p { color:#888; font-size:13px; }
+  label { display:block; font-size:11px; font-weight:700; color:#5b7aad; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  input { width:100%; padding:13px 16px; border:2px solid #c7d9f5; border-radius:10px; font-size:16px; margin-bottom:14px; outline:none; transition:.2s; }
+  input:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,0.12); }
+  .btn { background:#2563eb; color:#fff; border:none; padding:14px; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; width:100%; margin-bottom:10px; transition:.2s; }
+  .btn:hover { background:#1d4ed8; transform:translateY(-1px); }
+  .info { background:#eff6ff; border:1.5px solid #dbeafe; border-radius:10px; padding:14px; font-size:13px; color:#1e4db7; margin-top:16px; line-height:1.6; }
+  .status { margin-top:14px; font-weight:700; font-size:14px; text-align:center; padding:10px; border-radius:8px; display:none; }
+  .status.ok { background:#d1fae5; color:#065f46; display:block; }
+  .status.err { background:#fee2e2; color:#991b1b; display:block; }
+  .status.loading { background:#fef3c7; color:#92400e; display:block; }
+  .step2 { display:none; margin-top:20px; text-align:center; }
+  .step2 p { color:#1a3a6e; font-weight:700; font-size:15px; margin-bottom:10px; }
+  .step2 .path { background:#1a3a6e; color:#93c5fd; padding:10px 14px; border-radius:8px; font-family:monospace; font-size:13px; word-break:break-all; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <h2>🏥 TATA MEMORIAL HOSPITAL</h2>
+    <p>PDF Utility Tool — Server Connector</p>
+  </div>
+
+  <label>🔌 Server Computer IP Address</label>
+  <input type="text" id="ip" placeholder="e.g. 192.168.0.213" />
+  <button class="btn" onclick="connect()">🔗 Connect to Server</button>
+
+  <div class="info">
+    📌 <b>Step 1:</b> Run <b>START_SERVER.bat</b> on the server computer<br>
+    📌 <b>Step 2:</b> Note the IP shown in the black window<br>
+    📌 <b>Step 3:</b> Enter that IP above and click Connect
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <div class="step2" id="step2">
+    <p>✅ Connected! Ab yeh file kholo:</p>
+    <div class="path" id="html-path"></div>
+    <br>
+    <button class="btn" onclick="openApp()" style="background:#059669">📂 TMH App Kholo</button>
+  </div>
+</div>
+
+<script>
+  // Pre-fill saved IP
+  const saved = localStorage.getItem('mv_server_url');
+  if (saved) {
+    document.getElementById('ip').value = saved.replace('http://','').replace(':3000','');
+  }
+
+  let connectedUrl = '';
+
+  async function connect() {
+    let ip = document.getElementById('ip').value.trim();
+    const status = document.getElementById('status');
+    if (!ip) { showStatus('⚠️ IP address daalo pehle!', 'err'); return; }
+
+    if (!ip.startsWith('http')) ip = 'http://' + ip;
+    if (!ip.match(/:\d+$/)) ip = ip + ':3000';
+
+    showStatus('⏳ Server se connect ho raha hai...', 'loading');
+
+    try {
+      const resp = await fetch(ip + '/api/health', { signal: AbortSignal.timeout(6000) });
+      if (resp.ok) {
+        localStorage.setItem('mv_server_url', ip);
+        connectedUrl = ip;
+        showStatus('✅ Server connected!', 'ok');
+
+        // Find TMH_PDF_Tool.html path
+        const currentPath = window.location.href;
+        const folderPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+        document.getElementById('html-path').textContent = folderPath.replace('file:///', '').replace(/\//g, '\\') + '\\TMH_PDF_Tool.html';
+        document.getElementById('step2').style.display = 'block';
+      }
+    } catch(e) {
+      showStatus('❌ Server nahi mila! Check karo: START_SERVER.bat chal raha hai? IP sahi hai?', 'err');
+    }
+  }
+
+  function openApp() {
+    // Try to open TMH_PDF_Tool.html from same folder
+    const currentPath = window.location.href;
+    const folder = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+    window.location.href = folder + 'TMH_PDF_Tool.html';
+  }
+
+  function showStatus(msg, type) {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = 'status ' + type;
+  }
+
+  document.getElementById('ip').addEventListener('keypress', e => {
+    if (e.key === 'Enter') connect();
+  });
+</script>
+</body>
+</html>

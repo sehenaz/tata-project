@@ -1,0 +1,20 @@
+{
+  "admin": {
+    "password": "$2b$10$ZPQc7lCVedG86C1EAh7TaOs7GwLYMhaqmLgUec5zsZVGgzLcdYh.u",
+    "role": "admin",
+    "enabled": true,
+    "displayName": "Administrator"
+  },
+  "user1": {
+    "password": "$2b$10$vN2aOIPyo2anua1pU1n6aeHTKVUzXEt3i0CpjpfAvCaWibQD1jAOu",
+    "role": "user",
+    "enabled": true,
+    "displayName": "User One"
+  },
+  "user2": {
+    "password": "$2b$10$wT/FYabURSlNV9K0KTGjOOJB5W2T26uKEHj8CScleKXeP7cCoX/B2",
+    "role": "user",
+    "enabled": true,
+    "displayName": "User Two"
+  }
+}

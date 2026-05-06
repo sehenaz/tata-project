@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TMH Server IP Patcher</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #1a3a6e; display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+  .card { background:#fff; border-radius:16px; padding:40px; max-width:500px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.4); }
+  h2 { color:#1a3a6e; margin-bottom:8px; }
+  p { color:#666; font-size:14px; margin-bottom:20px; }
+  input { width:100%; padding:12px; border:2px solid #c7d9f5; border-radius:8px; font-size:15px; box-sizing:border-box; margin-bottom:12px; }
+  button { background:#2563eb; color:#fff; border:none; padding:12px 30px; border-radius:8px; font-size:15px; cursor:pointer; width:100%; }
+  button:hover { background:#1d4ed8; }
+  .info { background:#eff6ff; border:1px solid #dbeafe; border-radius:8px; padding:12px; font-size:13px; color:#1e4db7; margin-top:12px; }
+  .status { margin-top:12px; font-weight:bold; font-size:14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h2>🏥 TMH Server Connector</h2>
+  <p>Enter the IP address of the computer running <b>TMH_Server</b></p>
+  <input type="text" id="ip" placeholder="e.g. 10.9.2.53" />
+  <button onclick="connect()">🔗 Connect & Open App</button>
+  <div class="info">
+    📌 Open <b>START_SERVER.bat</b> on the server computer first.<br>
+    The IP address will be shown in that window.
+  </div>
+  <div class="status" id="status"></div>
+</div>
+<script>
+  // Pre-fill saved IP
+  const saved = localStorage.getItem('mv_server_url');
+  if (saved) {
+    document.getElementById('ip').value = saved.replace('http://','').replace(':3000','');
+  }
+  
+  async function connect() {
+    let ip = document.getElementById('ip').value.trim();
+    const status = document.getElementById('status');
+    if (!ip) { status.textContent = '⚠️ Please enter an IP address'; status.style.color='#dc2626'; return; }
+    
+    if (!ip.startsWith('http')) ip = 'http://' + ip;
+    if (!ip.includes(':3000')) ip = ip + ':3000';
+    
+    status.textContent = '⏳ Connecting to server...';
+    status.style.color = '#2563eb';
+    
+    try {
+      const resp = await fetch(ip + '/api/health', { signal: AbortSignal.timeout(5000) });
+      if (resp.ok) {
+        localStorage.setItem('mv_server_url', ip);
+        status.textContent = '✅ Connected! Opening app...';
+        status.style.color = '#059669';
+        setTimeout(() => { window.location.href = 'TMH_PDF_Tool.html'; }, 800);
+      } else {
+        status.textContent = '❌ Server responded with error. Check server.';
+        status.style.color = '#dc2626';
+      }
+    } catch(e) {
+      status.textContent = '❌ Cannot reach server. Check IP and make sure START_SERVER.bat is running.';
+      status.style.color = '#dc2626';
+    }
+  }
+  
+  document.getElementById('ip').addEventListener('keypress', e => { if (e.key === 'Enter') connect(); });
+</script>
+</body>
+</html>
