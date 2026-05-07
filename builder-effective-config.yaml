@@ -1,0 +1,9 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.tata.pdfutility
+productName: Tata PDF Utility
+win:
+  target: portable
+files: []
+electronVersion: 41.2.0

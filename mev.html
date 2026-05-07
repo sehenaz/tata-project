@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tata Memorial Hospital, Mumbai – PDF Utility Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+        :root {
+            --bg: #f0f5ff;
+            --bg2: #e8f0fe;
+            --blue-dk: #1a3a6e;
+            --blue: #1e4db7;
+            --accent: #2563eb;
+            --accent2: #3b82f6;
+            --blue-lt: #dbeafe;
+            --blue-xl: #eff6ff;
+            --success: #059669;
+            --danger: #dc2626;
+            --warn: #d97706;
+            --text: #0f2152;
+            --muted: #5b7aad;
+            --card: #ffffff;
+            --border: #c7d9f5;
+            --border2: #e2edfb;
+            --hover: #f0f7ff;
+            --white: #ffffff;
+            --sidebar: #1a3a6e;
+            --topbar: #1e4db7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at 10% 0%, rgba(37, 99, 235, 0.08) 0%, transparent 55%), radial-gradient(ellipse at 90% 100%, rgba(30, 77, 183, 0.06) 0%, transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── AUTH ─── */
+        #auth-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, #1a3a6e 0%, #2563eb 50%, #3b82f6 100%);
+        }
+
+        .auth-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 48px 44px;
+            width: 430px;
+            box-shadow: 0 24px 64px rgba(26, 58, 110, 0.25), 0 2px 8px rgba(37, 99, 235, 0.08);
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-logo img {
+            height: 96px;
+            width: 96px;
+            border-radius: 8px;
+            object-fit: contain;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2);
+        }
+
+        .auth-logo h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--blue-dk);
+            margin-top: 12px;
+        }
+
+        .auth-logo p {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 7px;
+            text-transform: uppercase;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--blue-xl);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+            background: #fff;
+        }
+
+        .form-group select option {
+            background: #fff;
+            color: var(--text);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all .2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #047857;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--muted);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--blue-xl);
+        }
+
+        .btn-info {
+            background: #0ea5e9;
+            color: #fff;
+        }
+
+        .btn-info:hover {
+            background: #0284c7;
+        }
+
+        .btn-sm {
+            padding: 7px 14px;
+            font-size: 12px;
+            border-radius: 7px;
+        }
+
+        .btn-xs {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+        }
+
+        .error-msg {
+            color: var(--danger);
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* ─── MAIN LAYOUT ─── */
+        #app {
+            display: none;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
+        }
+
+        .topbar {
+            height: 64px;
+            background: var(--topbar);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            box-shadow: 0 2px 16px rgba(26, 58, 110, 0.25);
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .topbar-left img {
+            height: 48px;
+            width: 48px;
+            border-radius: 4px;
+            object-fit: contain;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .topbar-left .brand {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #fff;
+        }
+
+        .topbar-left .brand span {
+            color: #93c5fd;
+        }
+
+        .topbar-left .sub {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.55);
+            margin-top: -2px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 6px 16px 6px 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .user-badge:hover {
+            background: rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #93c5fd, #ffffff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--blue-dk);
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .role-tag {
+            font-size: 10px;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .role-admin {
+            background: rgba(253, 224, 71, 0.25);
+            color: #fde047;
+            border: 1px solid rgba(253, 224, 71, 0.4);
+        }
+
+        .role-user {
+            background: rgba(147, 197, 253, 0.25);
+            color: #93c5fd;
+            border: 1px solid rgba(147, 197, 253, 0.4);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            bottom: 0;
+            width: 220px;
+            background: var(--sidebar);
+            border-right: none;
+            padding: 16px 0;
+            z-index: 90;
+            overflow-y: auto;
+            box-shadow: 2px 0 12px rgba(26, 58, 110, 0.15);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 22px;
+            cursor: pointer;
+            transition: all .15s;
+            border-left: 3px solid transparent;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-left-color: #93c5fd;
+        }
+
+        .nav-item .icon {
+            font-size: 17px;
+            width: 22px;
+            text-align: center;
+        }
+
+        .nav-section {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            color: rgba(255, 255, 255, 0.35);
+            padding: 18px 22px 6px;
+            text-transform: uppercase;
+        }
+
+        .main {
+            margin-left: 220px;
+            padding-top: 64px;
+            min-height: 100vh;
+            background: var(--bg);
+        }
+
+        .content {
+            padding: 28px 30px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* ─── STATS ─── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1.5px solid var(--border2);
+            border-radius: 14px;
+            padding: 22px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.06);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.13);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: var(--blue-xl);
+            transform: translate(20px, -20px);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--blue-dk);
+        }
+
+        .stat-icon {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            font-size: 22px;
+            opacity: .5;
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1.5px solid var(--border2);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.05);
+        }
+
+        .card-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: var(--blue-dk);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 14px;
+            border-bottom: 1.5px solid var(--border2);
+        }
+
+        /* ─── UPLOAD ─── */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 48px 28px;
+            text-align: center;
+            background: var(--blue-xl);
+            cursor: pointer;
+            transition: all .2s;
+            position: relative;
+        }
+
+        .upload-zone:hover,
+        .upload-zone.dragover {
+            border-color: var(--accent);
+            background: var(--blue-lt);
+        }
+
+        .upload-zone .icon {
+            font-size: 42px;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .upload-zone h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--blue-dk);
+            margin-bottom: 6px;
+        }
+
+        .upload-zone p {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .upload-zone input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .file-list {
+            margin-top: 18px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            background: var(--blue-xl);
+            border: 1.5px solid var(--border2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+        }
+
+        .file-item .fi-icon {
+            font-size: 22px;
+        }
+
+        .file-item .fi-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-item .fi-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-item .fi-meta {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .file-item .fi-status {
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-ok {
+            color: var(--success);
+        }
+
+        .status-proc {
+            color: var(--warn);
+        }
+
+        .status-err {
+            color: var(--danger);
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: var(--border2);
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: width .3s;
+            border-radius: 2px;
+        }
+
+        /* ─── TABLE ─── */
+        .tbl-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .8px;
+            color: var(--muted);
+            border-bottom: 2px solid var(--border2);
+            white-space: nowrap;
+            background: var(--blue-xl);
+        }
+
+        td {
+            padding: 12px 14px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border2);
+            color: var(--text);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--hover);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-green {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-blue {
+            background: var(--blue-lt);
+            color: var(--blue);
+        }
+
+        .badge-red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-yellow {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* ─── FILTERS ─── */
+        .filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .filters input,
+        .filters select {
+            padding: 9px 13px;
+            background: #fff;
+            border: 1.5px solid var(--border);
+            border-radius: 9px;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .filters input:focus,
+        .filters select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        /* ─── REPORT SUMMARY ─── */
+        .report-sum {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .rsum-card {
+            background: linear-gradient(135deg, var(--blue-xl), #fff);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 18px;
+        }
+
+        .rsum-label {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            font-weight: 700;
+        }
+
+        .rsum-val {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--blue-dk);
+            margin-top: 4px;
+        }
+
+        /* ─── PAGE HEADER ─── */
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--blue-dk);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .page-header p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* ─── TOAST ─── */
+        #toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
+            background: var(--success);
+            color: #fff;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+            transform: translateY(80px);
+            opacity: 0;
+            transition: all .3s;
+            pointer-events: none;
+        }
+
+        #toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        #toast.err {
+            background: var(--danger);
+        }
+
+        #toast.proc {
+            background: var(--warn);
+        }
+
+        /* ─── TABS ─── */
+        .tab-group {
+            display: flex;
+            gap: 4px;
+            background: var(--blue-xl);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 22px;
+            width: fit-content;
+        }
+
+        .tab-btn {
+            padding: 8px 20px;
+            border-radius: 7px;
+            border: none;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            background: transparent;
+            transition: all .2s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        /* ─── PDF PREVIEW MODAL ─── */
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            overflow: auto;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+        }
+
+        .preview-content {
+            background: #fff;
+            max-width: 960px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .preview-header {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--blue-dk);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preview-header-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .preview-body {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            overflow: auto;
+            background: #e8ecf0;
+            min-height: 400px;
+            max-height: 75vh;
+        }
+
+        .preview-body canvas {
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            background: #fff;
+        }
+
+        .preview-footer {
+            width: 100%;
+            padding: 12px 20px;
+            background: var(--blue-xl);
+            border-top: 1.5px solid var(--border2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .preview-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .ctrl-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+
+        .ctrl-btn:hover {
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+        .ctrl-btn:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .close-preview {
+            background: var(--danger);
+            border: none;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+        }
+
+        .close-preview:hover {
+            background: #b91c1c;
+        }
+
+        .page-indicator {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--blue-dk);
+            background: var(--blue-lt);
+            padding: 5px 14px;
+            border-radius: 7px;
+            border: 1.5px solid var(--border);
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .preview-modal.full .preview-content {
+            max-width: 100% !important;
+            height: 100%;
+            border-radius: 0;
+        }
+
+        .preview-modal.full .preview-body {
+            max-height: calc(100vh - 120px);
+        }
+
+        /* ─── DELETE CONFIRM MODAL ─── */
+        .confirm-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 20000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirm-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px 36px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .confirm-card h3 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 22px;
+            color: var(--blue-dk);
+            margin-bottom: 12px;
+        }
+
+        .confirm-card p {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .confirm-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* ─── EDIT USER MODAL ─── */
+        #edit-user-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ─── DATE EXPAND ─── */
+        .date-files-list {
+            background: var(--blue-xl);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .date-files-list.open {
+            display: block;
+        }
+
+        .date-file-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border2);
+        }
+
+        .date-file-row:last-child {
+            border-bottom: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent2);
+        }
+
+        .sep {
+            border: none;
+            border-top: 1.5px solid var(--border2);
+            margin: 20px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 3px 11px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .tag-admin {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .tag-user {
+            background: var(--blue-lt);
+            color: var(--blue);
+            border: 1px solid var(--border);
+        }
+
+        .thumb-clickable {
+            cursor: zoom-in;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            border-radius: 4px;
+        }
+
+        .thumb-clickable:hover {
+            transform: translateY(-4px) scale(1.08);
+            filter: brightness(1.1);
+            border-color: var(--accent) !important;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4) !important;
+            z-index: 10;
+        }
+
+        .storage-bar-wrap {
+            margin: 12px 0 20px;
+            background: var(--blue-xl);
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+
+        .storage-bar-wrap p {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .storage-bar {
+            height: 8px;
+            background: var(--border2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .storage-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--success), var(--accent));
+            transition: width .5s;
+        }
+
+        .storage-bar-fill.warn {
+            background: linear-gradient(90deg, var(--warn), var(--danger));
+        }
+
+        @media(max-width:900px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('mv_session')) {
+            document.write('<style>#auth-screen { display: none !important; }</style>');
+        }
+    </script>
+
+    <!-- ═══ PDF PREVIEW MODAL ═══ -->
+    <div id="preview-modal" class="preview-modal" onclick="closePreview(event)">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="preview-header">
+                <div class="preview-header-title" id="preview-title">PDF Preview</div>
+                <div class="preview-controls">
+                    <button class="ctrl-btn" onclick="adjustZoom(-0.25)">➖ Zoom Out</button>
+                    <button class="ctrl-btn" onclick="adjustZoom(0.25)">➕ Zoom In</button>
+                    <button class="ctrl-btn" onclick="toggleFullContent()">🖥️ Full Screen</button>
+                    <button class="close-preview"
+                        onclick="document.getElementById('preview-modal').style.display='none'">✕ Close</button>
+                </div>
+            </div>
+            <div class="preview-body" id="preview-body">
+                <div style="padding:60px;color:var(--muted);text-align:center;font-size:16px;">Loading PDF...</div>
+            </div>
+            <div class="preview-footer">
+                <button class="ctrl-btn" id="btn-prev-page" onclick="changePage(-1)"
+                    style="background:var(--accent);color:#fff;border-color:var(--accent);">◀ Previous</button>
+                <div class="page-indicator" id="page-indicator">1 / 1</div>
+                <button class="ctrl-btn" id="btn-next-page" onclick="changePage(1)"
+                    style="background:var(--accent);color:#fff;border-color:var(--accent);">Next ▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ DELETE CONFIRM MODAL ═══ -->
+    <div id="confirm-modal" class="confirm-modal">
+        <div class="confirm-card">
+            <h3>🗑️ Delete File Record</h3>
+            <p id="confirm-msg">Are you sure you want to delete this file record? This action cannot be undone.</p>
+            <div class="confirm-btns">
+                <button class="btn btn-danger" onclick="confirmDelete()">Yes, Delete</button>
+                <button class="btn btn-outline" onclick="closeConfirm()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ EDIT USER MODAL ═══ -->
+    <div id="edit-user-modal" onclick="closeUserEdit()">
+        <div class="auth-card" onclick="event.stopPropagation()"
+            style="width:450px;border-radius:16px;padding:30px;margin:auto;margin-top:80px;">
+            <div class="card-title" id="edit-user-title" style="margin-bottom:20px;font-size:20px;">Edit User Account
+            </div>
+            <div class="form-group"><label>Display Name</label><input type="text" id="edit-displayname"></div>
+            <div class="form-group"><label>Username (Login ID)</label><input type="text" id="edit-username"></div>
+            <div class="form-group"><label>New Password</label><input type="password" id="edit-password"
+                    placeholder="Leave blank to keep current"></div>
+            <div class="form-group"><label>Role</label><select id="edit-role">
+                    <option value="admin">Admin</option>
+                    <option value="user">User</option>
+                </select></div>
+            <div style="display:flex;gap:10px;margin-top:20px">
+                <button class="btn btn-primary" style="flex:1" onclick="saveUserEdit()">💾 Save Changes</button>
+                <button class="btn btn-outline" style="flex:1" onclick="closeUserEdit()">Cancel</button>
+            </div>
+            <input type="hidden" id="edit-old-username">
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════ AUTH SCREEN ═══════════════════════════ -->
+    <div id="auth-screen">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <img src="data:image/png;base64,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"
+                    alt="TMH Logo">
+                <h2>TATA MEMORIAL HOSPITAL, MUMBAI</h2>
+                <p>Scanning & Digitization Utility Tool</p>
+            </div>
+            <div class="form-group"><label>Username</label><input type="text" id="login-user"
+                    placeholder="Enter username" autocomplete="on"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="login-pass"
+                    placeholder="Enter password" autocomplete="on"></div>
+            <div class="form-group"><label>Login As</label><select id="login-role">
+                    <option value="admin">Administrator</option>
+                    <option value="user">User</option>
+                </select></div>
+            <!-- <div class="form-group" style="border-top:1px solid var(--border);padding-top:15px;margin-top:15px;">
+                <label>🏥 Hospital Main Server IP</label>
+                <div style="display:flex;gap:5px">
+                    <input type="text" id="server-ip" placeholder="e.g. 192.168.0.100" style="margin-bottom:0"
+                        oninput="clearServerError()">
+                    <button class="btn btn-outline btn-sm" onclick="checkServer()"
+                        style="white-space:nowrap">Test</button>
+                </div>
+                <small id="server-status" style="display:block;margin-top:5px;font-size:11px"></small>
+                <small id="local-server-info"
+                    style="display:block;margin-top:2px;font-size:11px;color:var(--muted)"></small>
+            </div> -->
+            <button class="btn btn-primary" onclick="doLogin()">🔐 Sign In</button>
+            <div id="login-error" class="error-msg"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════ MAIN APP ═══════════════════════════ -->
+    <div id="app">
+        <div class="topbar">
+            <div class="topbar-left">
+                <img src="data:image/png;base64,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"
+                    alt="logo">
+                <div>
+                    <div class="brand">TATA MEMORIAL <span style="font-size:14px">HOSPITAL</span></div>
+                    <div class="sub">PDF Utility Platform</div>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div class="user-badge" onclick="showPage('profile')" title="Profile Settings">
+                    <div class="user-avatar" id="tb-avatar">A</div>
+                    <div>
+                        <div class="user-name" id="tb-username">Admin</div>
+                        <div class="role-tag" id="tb-roletag">ADMIN</div>
+                    </div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="doLogout()"
+                    style="color:#fff;border-color:rgba(255,255,255,0.3)">🚪 Logout</button>
+            </div>
+        </div>
+
+        <div class="sidebar" id="sidebar"></div>
+
+        <div class="main">
+            <div class="content">
+
+                <!-- Dashboard -->
+                <div class="page active" id="page-dashboard">
+                    <div class="page-header">
+                        <h1>📊 Dashboard</h1>
+                        <p>Overview of all scanning activities</p>
+                    </div>
+                    <div class="stats-grid" id="stats-grid"></div>
+                    <div class="card">
+                        <div class="card-title">📋 Recent Uploads</div>
+                        <div class="tbl-wrap">
+                            <table id="recent-tbl">
+                                <thead>
+                                    <tr>
+                                        <th>File Name</th>
+                                        <th>User</th>
+                                        <th>Pages</th>
+                                        <th>Size</th>
+                                        <th>Date & Time</th>
+                                        <th>View PDF</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recent-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload -->
+                <div class="page" id="page-upload">
+                    <div class="page-header">
+                        <h1>📤 Upload PDFs</h1>
+                        <p>Upload PDFs — files are stored and accessible from any connected device</p>
+                    </div>
+                    <div id="storage-info-bar" class="storage-bar-wrap">
+                        <p>📦 Local Storage Used: <span id="storage-used-text">Calculating...</span></p>
+                        <div class="storage-bar">
+                            <div class="storage-bar-fill" id="storage-bar-fill" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div class="tab-group" style="flex-wrap:wrap;">
+                        <button class="tab-btn active" onclick="switchUploadTab('single',this)">📄 Single PDF</button>
+                        <button class="tab-btn" onclick="switchUploadTab('bulk',this)">📑 Bulk PDF</button>
+                    </div>
+
+                    <div id="upload-tab-single">
+                        <div class="upload-zone" id="drop-single" ondragover="ev(event)"
+                            ondrop="dropFiles(event,'single')">
+                            <input type="file" id="file-single" accept=".pdf"
+                                onchange="handleFiles(this.files,'single')">
+                            <span class="icon">📄</span>
+                            <h3>Drop single PDF here or click to browse</h3>
+                            <p>PDF will be stored and viewable from any device on the network</p>
+                        </div>
+                        <div class="file-list" id="list-single"></div>
+                        <div style="margin-top:16px;display:none" id="btn-upload-single">
+                            <button class="btn btn-primary" style="width:auto;padding:12px 32px"
+                                onclick="processUpload('single')">⚡ Process & Save PDF</button>
+                        </div>
+                    </div>
+
+                    <div id="upload-tab-bulk" style="display:none">
+                        <div class="upload-zone" id="drop-bulk" ondragover="ev(event)" ondrop="dropFiles(event,'bulk')">
+                            <input type="file" id="file-bulk" accept=".pdf" multiple
+                                onchange="handleFiles(this.files,'bulk')">
+                            <span class="icon">📑</span>
+                            <h3>Drop multiple PDFs here or click to browse</h3>
+                            <p>All PDFs stored and accessible cross-device</p>
+                        </div>
+                        <div class="file-list" id="list-bulk"></div>
+                        <div style="margin-top:16px;display:none" id="btn-upload-bulk">
+                            <button class="btn btn-primary" style="width:auto;padding:12px 32px"
+                                onclick="processUpload('bulk')">⚡ Process & Save All PDFs</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date-wise Report -->
+                <div class="page" id="page-datereport">
+                    <div class="page-header">
+                        <h1>📅 Date-wise Report</h1>
+                        <p>Scanning activity grouped by date — click a date row to view uploaded files</p>
+                    </div>
+                    <div class="card">
+                        <div class="filters">
+                            <input type="date" id="dr-from" placeholder="From date">
+                            <input type="date" id="dr-to" placeholder="To date">
+                            <select id="dr-user">
+                                <option value="">All Users</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="loadDateReport()">🔍 Filter</button>
+                            <button class="btn btn-outline btn-sm" onclick="exportExcel('date')">⬇️ Export
+                                Excel</button>
+                        </div>
+                        <div id="date-report-sum" class="report-sum"></div>
+                        <div class="tbl-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Files Uploaded</th>
+                                        <th>Total Pages</th>
+                                        <th>Total Size</th>
+                                        <th>Users Active</th>
+                                        <th>View Files</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="date-report-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File-wise Report -->
+                <div class="page" id="page-filereport">
+                    <div class="page-header">
+                        <h1>📂 File-wise Report</h1>
+                        <p>Detailed per-file statistics with PDF viewer and delete options</p>
+                    </div>
+                    <div class="card">
+                        <div class="filters">
+                            <input type="text" id="fr-search" placeholder="🔍 Search file name..."
+                                oninput="loadFileReport()">
+                            <input type="date" id="fr-from">
+                            <input type="date" id="fr-to">
+                            <select id="fr-user">
+                                <option value="">All Users</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="loadFileReport()">Filter</button>
+                            <button class="btn btn-outline btn-sm" onclick="exportExcel('file')">⬇️ Export
+                                Excel</button>
+                        </div>
+                        <div id="file-report-sum" class="report-sum"></div>
+                        <div class="tbl-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>File Name</th>
+                                        <th>Uploaded By</th>
+                                        <th>Pages</th>
+                                        <th>File Size</th>
+                                        <th>Upload Date & Time</th>
+                                        <th>View PDF</th>
+                                        <th>Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="file-report-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User-wise Report -->
+                <div class="page" id="page-userreport">
+                    <div class="page-header">
+                        <h1>👤 User-wise Report</h1>
+                        <p>Scanning statistics per user</p>
+                    </div>
+                    <div class="card">
+                        <div class="filters">
+                            <input type="date" id="ur-from">
+                            <input type="date" id="ur-to">
+                            <button class="btn btn-primary btn-sm" onclick="loadUserReport()">Filter</button>
+                            <button class="btn btn-outline btn-sm" onclick="exportExcel('user')">⬇️ Export
+                                Excel</button>
+                        </div>
+                        <div class="tbl-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Role</th>
+                                        <th>Files Uploaded</th>
+                                        <th>Total Pages</th>
+                                        <th>Total Size</th>
+                                        <th>Last Upload</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-report-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile -->
+                <div class="page" id="page-profile">
+                    <div class="page-header">
+                        <h1>⚙️ Profile Settings</h1>
+                        <p>Change your personal information and login credentials</p>
+                    </div>
+                    <div class="card" style="max-width:500px;">
+                        <div class="card-title">My Account Info</div>
+                        <div style="margin-top:20px">
+                            <div class="form-group"><label>Display Name</label><input type="text" id="prof-displayname"
+                                    placeholder="Enter your full name"></div>
+                            <div class="form-group"><label>Username (Login ID)</label><input type="text"
+                                    id="prof-username" placeholder="Login ID"></div>
+                            <div class="form-group"><label>New Password</label><input type="password" id="prof-password"
+                                    placeholder="Leave blank to keep current"></div>
+                            <div class="form-group"><label>Confirm New Password</label><input type="password"
+                                    id="prof-confirm" placeholder="Confirm new password"></div>
+                            <button class="btn btn-primary" onclick="updateProfile()">💾 Save Changes</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manage Users -->
+                <div class="page" id="page-users">
+                    <div class="page-header">
+                        <h1>👥 Manage Users</h1>
+                        <p>Create, edit, or disable user access to the platform</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">User Accounts</div>
+                        <div class="tbl-wrap">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Username</th>
+                                        <th>Role</th>
+                                        <th>Files Uploaded</th>
+                                        <th>Total Pages</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">✅ Done!</div>
+
+    <script>
+        // ══════════════════════════════════════════════════════════
+        // PDF.js
+        // ══════════════════════════════════════════════════════════
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        // ══════════════════════════════════════════════════════════
+        // DATA STORE
+        // ══════════════════════════════════════════════════════════
+        let USERS = {
+            admin: { password: 'admin123', role: 'admin', enabled: true, displayName: 'Admin' },
+            user1: { password: 'user123', role: 'user', enabled: true, displayName: 'User One' },
+            user2: { password: 'user123', role: 'user', enabled: true, displayName: 'User Two' }
+        };
+
+        let currentUser = null;
+        // uploads: {id, userId, fileName, fileSize, pages, uploadDate, uploadTime, uploadDateTime, pdfData(base64)}
+        let uploads = [];
+        let pendingFiles = { single: [], bulk: [] };
+
+        // ══════════════════════════════════════════════════════════
+        // SERVER SYNC
+        // ══════════════════════════════════════════════════════════
+        let SERVER_URL = localStorage.getItem('mv_server_url') || "";
+        let SERVER_CONNECTED = false;
+        let SYNC_INTERVAL = null;
+
+        async function checkServer() {
+            let ip = document.getElementById('server-ip').value.trim().replace(/[\\ ]/g, '');
+            document.getElementById('server-ip').value = ip;
+            const status = document.getElementById('server-status');
+            if (!ip) {
+                status.textContent = "ℹ️ Terminal Mode: Data saved locally on this device only.";
+                status.style.color = "var(--warn)";
+                SERVER_URL = ""; SERVER_CONNECTED = false;
+                localStorage.removeItem('mv_server_url');
+                return false;
+            }
+            if (ip.toLowerCase() === 'localhost') ip = '127.0.0.1';
+            let url = ip.startsWith('http') ? ip : 'http://' + ip;
+            try { const u = new URL(url); if (!u.port) u.port = "3000"; url = u.protocol + "//" + u.hostname + ":" + u.port; } catch (e) { }
+            status.textContent = "⏳ Checking connection...";
+            status.style.color = "var(--accent)";
+            try {
+                const resp = await fetch(`${url}/api/health`, { signal: AbortSignal.timeout(8000) });
+                if (resp.ok) {
+                    SERVER_URL = url; SERVER_CONNECTED = true;
+                    localStorage.setItem('mv_server_url', SERVER_URL);
+                    status.innerHTML = "✅ <b>Connected!</b> Hospital Main Server is active.";
+                    status.style.color = "var(--success)";
+                    startAutoSync();
+                    return true;
+                }
+            } catch (e) {
+                status.innerHTML = `❌ <b>Server Not Reachable.</b> Check network and server IP.`;
+                status.style.color = "var(--danger)";
+                SERVER_CONNECTED = false;
+            }
+            return false;
+        }
+
+        function clearServerError() { const s = document.getElementById('server-status'); if (s) s.textContent = ''; }
+
+        function startAutoSync() {
+            if (SYNC_INTERVAL) clearInterval(SYNC_INTERVAL);
+            SYNC_INTERVAL = setInterval(async () => { if (SERVER_CONNECTED && currentUser) await syncToServer(); }, 30000);
+        }
+
+        async function syncToServer() {
+            if (!SERVER_URL || !SERVER_CONNECTED) return;
+            try {
+                // Sync uploads metadata (without heavy pdfData for speed, use separate endpoint for pdf)
+                const metaOnly = uploads.map(u => { const { pdfData, ...rest } = u; return rest; });
+                const resp = await fetch(`${SERVER_URL}/api/sync-uploads`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uploads: metaOnly })
+                });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    // Merge server data but keep local pdfData
+                    const serverUploads = data.uploads || [];
+                    const merged = serverUploads.map(su => {
+                        const local = uploads.find(u => u.id === su.id);
+                        return local ? { ...su, pdfData: local.pdfData } : su;
+                    });
+                    // Add local-only uploads not yet on server
+                    uploads.forEach(lu => {
+                        if (!merged.find(m => m.id === lu.id)) merged.push(lu);
+                    });
+                    uploads = merged;
+                    saveLocal();
+                }
+                if (currentUser && currentUser.role === 'admin') {
+                    await fetch(`${SERVER_URL}/api/save-users`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(USERS) });
+                }
+            } catch (e) { console.warn("Sync failed:", e); }
+        }
+
+        // Save pdfData to server separately by upload ID
+        async function savePdfToServer(upload) {
+            if (!SERVER_URL || !SERVER_CONNECTED || !upload.pdfData) return;
+            try {
+                await fetch(`${SERVER_URL}/api/save-pdf`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: upload.id, pdfData: upload.pdfData, fileName: upload.fileName })
+                });
+            } catch (e) { console.warn("PDF server save failed:", e); }
+        }
+
+        async function loadPdfFromServer(uploadId) {
+            if (!SERVER_URL || !SERVER_CONNECTED) return null;
+            try {
+                const resp = await fetch(`${SERVER_URL}/api/get-pdf/${uploadId}`);
+                if (resp.ok) { const data = await resp.json(); return data.pdfData || null; }
+            } catch (e) { }
+            return null;
+        }
+
+        function saveLocal() {
+            try {
+                // Save metadata without pdfData separately to avoid quota issues
+                const meta = uploads.map(u => { const { pdfData, ...rest } = u; return rest; });
+                localStorage.setItem('mv_uploads_meta', JSON.stringify(meta));
+                localStorage.setItem('mv_users', JSON.stringify(USERS));
+
+                // Save pdfData separately per upload (chunk storage)
+                uploads.forEach(u => {
+                    if (u.pdfData) {
+                        try { localStorage.setItem('mv_pdf_' + u.id, u.pdfData); } catch (e) { /* storage full */ }
+                    }
+                });
+            } catch (e) { console.error("Local save error:", e); }
+        }
+
+        async function saveData() {
+            saveLocal();
+            if (SERVER_URL && SERVER_CONNECTED) {
+                try { await syncToServer(); } catch (e) { }
+            }
+        }
+
+        async function loadData() {
+            // Load from server if connected
+            if (SERVER_URL && SERVER_CONNECTED) {
+                try {
+                    const resp = await fetch(`${SERVER_URL}/api/data`);
+                    const data = await resp.json();
+                    const serverUploads = data.uploads || [];
+                    // Attach local pdfData where available
+                    uploads = serverUploads.map(su => {
+                        const localPdf = localStorage.getItem('mv_pdf_' + su.id);
+                        return { ...su, pdfData: localPdf || null };
+                    });
+                    USERS = data.users || USERS;
+                    saveLocal();
+                    return;
+                } catch (e) { console.warn("Server load failed, using local data."); }
+            }
+            // Fallback: local storage
+            try {
+                const meta = localStorage.getItem('mv_uploads_meta');
+                if (meta) {
+                    const arr = JSON.parse(meta);
+                    uploads = arr.map(u => {
+                        const pdfData = localStorage.getItem('mv_pdf_' + u.id) || null;
+                        return { ...u, pdfData };
+                    });
+                }
+                const s = localStorage.getItem('mv_users');
+                if (s) USERS = JSON.parse(s);
+            } catch (e) { }
+        }
+
+        function updateStorageBar() {
+            try {
+                let total = 0;
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('mv_')) {
+                        total += (localStorage.getItem(key) || '').length * 2; // UTF-16
+                    }
+                }
+                const maxBytes = 10 * 1024 * 1024; // ~10MB practical limit
+                const pct = Math.min((total / maxBytes) * 100, 100);
+                const mb = (total / 1048576).toFixed(2);
+                const el = document.getElementById('storage-used-text');
+                const bar = document.getElementById('storage-bar-fill');
+                if (el) el.textContent = `${mb} MB of ~10 MB`;
+                if (bar) {
+                    bar.style.width = pct + '%';
+                    bar.className = 'storage-bar-fill' + (pct > 70 ? ' warn' : '');
+                }
+            } catch (e) { }
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // AUTH
+        // ══════════════════════════════════════════════════════════
+        async function doLogin() {
+            const u = document.getElementById('login-user').value.trim();
+            const p = document.getElementById('login-pass').value;
+            const r = document.getElementById('login-role').value;
+            const err = document.getElementById('login-error');
+            err.textContent = '';
+
+            if (SERVER_URL) {
+                try {
+                    const resp = await fetch(`${SERVER_URL}/api/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p, role: r }) });
+                    if (resp.ok) {
+                        const userData = await resp.json();
+                        currentUser = { username: u, ...userData, enabled: !!userData.enabled };
+                        localStorage.setItem('mv_session', JSON.stringify(currentUser));
+                        document.getElementById('auth-screen').style.display = 'none';
+                        document.getElementById('app').style.display = 'block';
+                        SERVER_CONNECTED = true;
+                        initApp(); return;
+                    } else { const d = await resp.json(); err.textContent = `❌ ${d.error || 'Login failed'}`; return; }
+                } catch (e) { console.warn('Server unreachable, local login...'); }
+            }
+
+            if (!USERS[u]) { err.textContent = '❌ User not found'; return; }
+            if (USERS[u].password !== p) { err.textContent = '❌ Wrong password'; return; }
+            if (USERS[u].role !== r) { err.textContent = `❌ This account is not a ${r}`; return; }
+            if (!USERS[u].enabled && r !== 'admin') { err.textContent = '❌ Account disabled'; return; }
+
+            currentUser = { username: u, ...USERS[u] };
+            localStorage.setItem('mv_session', JSON.stringify(currentUser));
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app').style.display = 'block';
+            initApp();
+        }
+
+        function doLogout() {
+            currentUser = null;
+            localStorage.removeItem('mv_session');
+            localStorage.removeItem('mv_last_page');
+            document.getElementById('auth-screen').style.display = 'flex';
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('login-pass').value = '';
+            document.getElementById('login-error').textContent = '';
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // APP INIT
+        // ══════════════════════════════════════════════════════════
+        async function initApp() {
+            await loadData();
+            if (!currentUser) return;
+            document.getElementById('tb-username').textContent = currentUser.displayName || currentUser.username;
+            document.getElementById('tb-avatar').textContent = (currentUser.displayName || currentUser.username)[0].toUpperCase();
+            const rt = document.getElementById('tb-roletag');
+            rt.textContent = (currentUser.role || 'user').toUpperCase();
+            rt.className = 'role-tag ' + (currentUser.role === 'admin' ? 'role-admin' : 'role-user');
+            buildSidebar();
+            const lastPage = localStorage.getItem('mv_last_page');
+            const pageToLoad = lastPage && document.getElementById('page-' + lastPage) ? lastPage : 'dashboard';
+            showPage(pageToLoad);
+            populateUserDropdowns();
+        }
+
+        function buildSidebar() {
+            const isAdmin = currentUser.role === 'admin';
+            const nav = [
+                { section: 'Main' },
+                { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
+                { id: 'upload', icon: '📤', label: 'Upload PDFs' },
+                { section: 'Reports' },
+                { id: 'datereport', icon: '📅', label: 'Date-wise Report' },
+                { id: 'filereport', icon: '📂', label: 'File-wise Report' },
+                ...(isAdmin ? [{ id: 'userreport', icon: '👤', label: 'User-wise Report' }] : []),
+                { section: 'Account' },
+                { id: 'profile', icon: '⚙️', label: 'Profile Settings' },
+                ...(isAdmin ? [{ section: 'Admin' }, { id: 'users', icon: '👥', label: 'Manage Users' }] : [])
+            ];
+            let html = '';
+            nav.forEach(n => {
+                if (n.section) html += `<div class="nav-section">${n.section}</div>`;
+                else html += `<div class="nav-item" id="nav-${n.id}" onclick="showPage('${n.id}')"><span class="icon">${n.icon}</span>${n.label}</div>`;
+            });
+            document.getElementById('sidebar').innerHTML = html;
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const pg = document.getElementById('page-' + id);
+            const nv = document.getElementById('nav-' + id);
+            if (pg) pg.classList.add('active');
+            if (nv) nv.classList.add('active');
+            localStorage.setItem('mv_last_page', id);
+            if (id === 'dashboard') loadDashboard();
+            if (id === 'datereport') loadDateReport();
+            if (id === 'filereport') loadFileReport();
+            if (id === 'userreport') loadUserReport();
+            if (id === 'profile') loadProfilePage();
+            if (id === 'users') loadUsersPage();
+            if (id === 'upload') updateStorageBar();
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // UPLOAD
+        // ══════════════════════════════════════════════════════════
+        function switchUploadTab(tab, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('upload-tab-single').style.display = tab === 'single' ? '' : 'none';
+            document.getElementById('upload-tab-bulk').style.display = tab === 'bulk' ? '' : 'none';
+        }
+
+        function ev(e) { e.preventDefault(); e.stopPropagation(); }
+
+        function dropFiles(e, type) {
+            ev(e);
+            let files = Array.from(e.dataTransfer.files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+            if (!files.length) { showToast('No PDF files found!', 'err'); return; }
+            if (type === 'single') files = [files[0]];
+            handleFiles(files, type);
+        }
+
+        function handleFiles(files, type) {
+            let arr = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+            if (type === 'single' && arr.length > 0) arr = [arr[0]];
+            if (!arr.length) { showToast('No PDF files found!', 'err'); return; }
+            pendingFiles[type] = arr;
+            renderFileList(arr, type);
+            document.getElementById('btn-upload-' + type).style.display = '';
+        }
+
+        function renderFileList(files, type) {
+            const container = document.getElementById('list-' + type);
+            container.innerHTML = files.map((f, i) => `
+                <div class="file-item" id="fi-${type}-${i}">
+                    <span class="fi-icon">📄</span>
+                    <div class="fi-info">
+                        <div class="fi-name">${f.name}</div>
+                        <div class="fi-meta">${formatSize(f.size)} · Pending</div>
+                        <div class="progress-bar"><div class="progress-fill" id="prog-${type}-${i}" style="width:0%"></div></div>
+                    </div>
+                    <span class="fi-status status-proc" id="status-${type}-${i}">⏳ Waiting</span>
+                </div>
+            `).join('');
+        }
+
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function processUpload(type) {
+            const files = pendingFiles[type];
+            if (!files.length) return;
+            document.getElementById('btn-upload-' + type).style.display = 'none';
+
+            for (let i = 0; i < files.length; i++) {
+                const f = files[i];
+                const prog = document.getElementById(`prog-${type}-${i}`);
+                const stat = document.getElementById(`status-${type}-${i}`);
+                stat.textContent = '⏳ Processing...';
+                stat.className = 'fi-status status-proc';
+
+                try {
+                    // Read PDF for page count and thumbnails
+                    const ab = await f.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument({ data: ab.slice(0) }).promise;
+                    const pages = pdf.numPages;
+
+                    // Convert to base64 for storage
+                    stat.textContent = '💾 Storing PDF...';
+                    let pdfData = null;
+                    try { pdfData = await fileToBase64(f); } catch (e) { console.warn("Base64 conversion failed"); }
+
+                    // Render thumbnails
+                    const fiInfo = document.querySelector(`#fi-${type}-${i} .fi-info`);
+                    const thumbsDiv = document.createElement('div');
+                    thumbsDiv.style.cssText = 'display:flex;gap:10px;margin-top:12px;overflow-x:auto;padding-bottom:8px;';
+                    fiInfo.appendChild(thumbsDiv);
+
+                    for (let p = 1; p <= pages; p++) {
+                        prog.style.width = Math.round((p / pages) * 100) + '%';
+                        const page = await pdf.getPage(p);
+                        const viewport = page.getViewport({ scale: 0.25 });
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+                        canvas.style.cssText = 'border-radius:6px;box-shadow:0 2px 6px rgba(37,99,235,0.15);border:1px solid var(--border);flex-shrink:0;';
+                        canvas.className = 'thumb-clickable';
+                        canvas.title = `Page ${p} — click to view full size`;
+                        canvas.onclick = () => openPdfViewer(pdfData, p, f.name);
+                        await page.render({ canvasContext: ctx, viewport }).promise;
+                        thumbsDiv.appendChild(canvas);
+                    }
+
+                    const now = new Date();
+                    const upload = {
+                        id: Date.now() + '-' + i,
+                        userId: currentUser.username,
+                        fileName: f.name,
+                        fileSize: f.size,
+                        pages,
+                        uploadDate: now.toISOString().slice(0, 10),
+                        uploadTime: now.toTimeString().slice(0, 8),
+                        uploadDateTime: now.toISOString(),
+                        pdfData
+                    };
+                    uploads.push(upload);
+                    saveLocal();
+                    if (SERVER_URL && SERVER_CONNECTED) await savePdfToServer(upload);
+                    await saveData();
+
+                    stat.textContent = `✅ ${pages} pages saved`;
+                    stat.className = 'fi-status status-ok';
+                    document.querySelector(`#fi-${type}-${i} .fi-meta`).textContent = `${formatSize(f.size)} · ${pages} pages · ✅ Stored`;
+                } catch (e) {
+                    prog.style.width = '100%';
+                    stat.textContent = '❌ Error';
+                    stat.className = 'fi-status status-err';
+                    console.error(e);
+                }
+            }
+
+            document.getElementById('file-' + type).value = '';
+            showToast(`✅ ${files.length} file(s) processed and stored!`);
+            updateStorageBar();
+
+            // Clear button
+            const container = document.getElementById('btn-upload-' + type).parentNode;
+            let clearBtn = document.getElementById('btn-clear-' + type);
+            if (!clearBtn) {
+                clearBtn = document.createElement('button');
+                clearBtn.id = 'btn-clear-' + type;
+                clearBtn.className = 'btn btn-outline btn-sm';
+                clearBtn.style.marginLeft = '10px';
+                clearBtn.innerHTML = '🧹 Clear & New Upload';
+                clearBtn.onclick = () => {
+                    pendingFiles[type] = [];
+                    document.getElementById('list-' + type).innerHTML = '';
+                    clearBtn.style.display = 'none';
+                    document.getElementById('btn-upload-' + type).style.display = 'none';
+                };
+                container.appendChild(clearBtn);
+            }
+            clearBtn.style.display = '';
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // PDF VIEWER
+        // ══════════════════════════════════════════════════════════
+        let currPdf = null;
+        let currPageNum = 1;
+        let currZoom = 1.5;
+        let currTotalPages = 1;
+        let currFileName = '';
+
+        async function openPdfViewer(pdfDataOrId, startPage, fileName) {
+            let pdfData = pdfDataOrId;
+
+            // If it's an upload ID string (not base64), find the upload
+            if (typeof pdfDataOrId === 'string' && pdfDataOrId.length < 50) {
+                const upload = uploads.find(u => u.id === pdfDataOrId);
+                if (!upload) { showToast('PDF not found in local storage.', 'err'); return; }
+                pdfData = upload.pdfData;
+                if (!pdfData && SERVER_CONNECTED) {
+                    showToast('⏳ Loading PDF from server...', 'proc');
+                    pdfData = await loadPdfFromServer(pdfDataOrId);
+                    if (pdfData) { upload.pdfData = pdfData; saveLocal(); }
+                }
+                if (!pdfData) { showToast('PDF data not available. Re-upload the file.', 'err'); return; }
+                fileName = upload.fileName;
+            }
+
+            if (!pdfData) { showToast('PDF not available. Re-upload to store it.', 'err'); return; }
+
+            document.getElementById('preview-modal').style.display = 'flex';
+            document.getElementById('preview-modal').classList.remove('full');
+            document.getElementById('preview-body').innerHTML = '<div style="padding:60px;color:var(--muted);text-align:center;font-size:16px;">⏳ Loading PDF...</div>';
+
+            try {
+                const binary = atob(pdfData);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+                currPdf = await pdfjsLib.getDocument({ data: bytes }).promise;
+                currTotalPages = currPdf.numPages;
+                currPageNum = startPage || 1;
+                currZoom = 1.5;
+                currFileName = fileName || 'PDF';
+                await renderPreview();
+            } catch (e) {
+                document.getElementById('preview-body').innerHTML = '<div style="padding:60px;color:var(--danger);text-align:center;">❌ Failed to load PDF. The file may be corrupted.</div>';
+                console.error(e);
+            }
+        }
+
+        async function renderPreview() {
+            if (!currPdf) return;
+            const body = document.getElementById('preview-body');
+            document.getElementById('preview-title').textContent = `${currFileName} — Page ${currPageNum} of ${currTotalPages}`;
+            document.getElementById('page-indicator').textContent = `${currPageNum} / ${currTotalPages}`;
+            document.getElementById('btn-prev-page').disabled = currPageNum <= 1;
+            document.getElementById('btn-next-page').disabled = currPageNum >= currTotalPages;
+            body.innerHTML = '<div style="padding:60px;color:var(--muted);text-align:center;font-size:15px;">⏳ Rendering page...</div>';
+            try {
+                const page = await currPdf.getPage(currPageNum);
+                const viewport = page.getViewport({ scale: currZoom });
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                await page.render({ canvasContext: ctx, viewport }).promise;
+                body.innerHTML = '';
+                body.appendChild(canvas);
+            } catch (e) {
+                body.innerHTML = '<div style="padding:60px;color:var(--danger);text-align:center;">❌ Failed to render page.</div>';
+            }
+        }
+
+        function changePage(delta) {
+            const newPage = currPageNum + delta;
+            if (newPage >= 1 && newPage <= currTotalPages) {
+                currPageNum = newPage;
+                renderPreview();
+            }
+        }
+
+        function adjustZoom(delta) {
+            currZoom = Math.max(0.25, Math.min(4, currZoom + delta));
+            renderPreview();
+        }
+
+        function toggleFullContent() {
+            document.getElementById('preview-modal').classList.toggle('full');
+        }
+
+        function closePreview(e) {
+            if (e && e.target !== document.getElementById('preview-modal')) return;
+            document.getElementById('preview-modal').style.display = 'none';
+        }
+
+        // Keyboard nav
+        document.addEventListener('keydown', e => {
+            if (document.getElementById('preview-modal').style.display === 'flex') {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changePage(1);
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
+                if (e.key === 'Escape') document.getElementById('preview-modal').style.display = 'none';
+            }
+        });
+
+        // ══════════════════════════════════════════════════════════
+        // DELETE
+        // ══════════════════════════════════════════════════════════
+        let deleteTargetId = null;
+
+        function promptDelete(uploadId, fileName) {
+            deleteTargetId = uploadId;
+            document.getElementById('confirm-msg').textContent = `Delete "${fileName}"? This will remove the file record and stored PDF data permanently.`;
+            document.getElementById('confirm-modal').style.display = 'flex';
+        }
+
+        function closeConfirm() {
+            deleteTargetId = null;
+            document.getElementById('confirm-modal').style.display = 'none';
+        }
+
+        async function confirmDelete() {
+            if (!deleteTargetId) return;
+            const idx = uploads.findIndex(u => u.id === deleteTargetId);
+            if (idx !== -1) {
+                const upload = uploads[idx];
+                // Remove from array
+                uploads.splice(idx, 1);
+                // Remove PDF from localStorage
+                localStorage.removeItem('mv_pdf_' + deleteTargetId);
+                // Notify server
+                if (SERVER_URL && SERVER_CONNECTED) {
+                    try {
+                        await fetch(`${SERVER_URL}/api/delete-upload`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: deleteTargetId })
+                        });
+                    } catch (e) { }
+                }
+                await saveData();
+                showToast(`🗑️ "${upload.fileName}" deleted successfully.`);
+            }
+            closeConfirm();
+            // Refresh current page
+            const active = document.querySelector('.page.active');
+            if (active) {
+                const id = active.id.replace('page-', '');
+                if (id === 'filereport') loadFileReport();
+                else if (id === 'datereport') loadDateReport();
+                else if (id === 'dashboard') loadDashboard();
+                updateStorageBar();
+            }
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // DASHBOARD
+        // ══════════════════════════════════════════════════════════
+        function loadDashboard() {
+            const myUploads = currentUser.role === 'admin' ? uploads : uploads.filter(u => u.userId === currentUser.username);
+            const totalFiles = myUploads.length;
+            const totalPages = myUploads.reduce((s, u) => s + u.pages, 0);
+            const totalSize = myUploads.reduce((s, u) => s + u.fileSize, 0);
+            const today = new Date().toISOString().slice(0, 10);
+            const todayFiles = myUploads.filter(u => u.uploadDate === today).length;
+            const isAdmin = currentUser.role === 'admin';
+            const activeUsers = isAdmin ? Object.entries(USERS).filter(([k, v]) => v.role === 'user' && v.enabled).length : null;
+
+            document.getElementById('stats-grid').innerHTML = `
+                <div class="stat-card"><span class="stat-icon">📄</span><div class="stat-label">Total Files</div><div class="stat-value">${totalFiles}</div><div class="stat-sub">All uploads</div></div>
+                <div class="stat-card"><span class="stat-icon">📑</span><div class="stat-label">Total Pages</div><div class="stat-value">${totalPages.toLocaleString()}</div><div class="stat-sub">Scanned pages</div></div>
+                <div class="stat-card"><span class="stat-icon">💾</span><div class="stat-label">Total Size</div><div class="stat-value">${formatSize(totalSize)}</div><div class="stat-sub">Storage used</div></div>
+                <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-label">${isAdmin ? 'Active Users' : 'Today\'s Files'}</div><div class="stat-value">${isAdmin ? activeUsers : todayFiles}</div><div class="stat-sub">${isAdmin ? 'Users enabled' : 'Uploaded today'}</div></div>
+            `;
+
+            const recent = [...myUploads].sort((a, b) => new Date(b.uploadDateTime) - new Date(a.uploadDateTime)).slice(0, 10);
+            document.getElementById('recent-tbody').innerHTML = recent.length ? recent.map(u => `
+                <tr>
+                    <td><span style="font-weight:600">📄 ${u.fileName}</span></td>
+                    <td><span class="tag ${u.userId === 'admin' ? 'tag-admin' : 'tag-user'}">${USERS[u.userId]?.displayName || u.userId}</span></td>
+                    <td>${u.pages}</td>
+                    <td>${formatSize(u.fileSize)}</td>
+                    <td>${u.uploadDate} ${u.uploadTime}</td>
+                    <td>
+                        ${u.pdfData
+                    ? `<button class="btn btn-info btn-xs" onclick="openPdfViewer('${u.id}',1,'${escHtml(u.fileName)}')">👁️ View PDF</button>`
+                    : `<span style="font-size:11px;color:var(--muted)">No data</span>`}
+                    </td>
+                    <td><span class="badge badge-green">✅ Done</span></td>
+                </tr>
+            `).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px">No uploads yet</td></tr>';
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // DATE-WISE REPORT
+        // ══════════════════════════════════════════════════════════
+        function loadDateReport() {
+            const from = document.getElementById('dr-from').value;
+            const to = document.getElementById('dr-to').value;
+            const user = document.getElementById('dr-user').value;
+
+            let data = currentUser.role === 'admin' ? [...uploads] : uploads.filter(u => u.userId === currentUser.username);
+            if (user) data = data.filter(u => u.userId === user);
+            if (from) data = data.filter(u => u.uploadDate >= from);
+            if (to) data = data.filter(u => u.uploadDate <= to);
+
+            const byDate = {};
+            data.forEach(u => {
+                if (!byDate[u.uploadDate]) byDate[u.uploadDate] = { date: u.uploadDate, files: [], pages: 0, size: 0, users: new Set() };
+                byDate[u.uploadDate].files.push(u);
+                byDate[u.uploadDate].pages += u.pages;
+                byDate[u.uploadDate].size += u.fileSize;
+                byDate[u.uploadDate].users.add(u.userId);
+            });
+
+            const rows = Object.values(byDate).sort((a, b) => b.date.localeCompare(a.date));
+            const totF = rows.reduce((s, r) => s + r.files.length, 0);
+            const totP = rows.reduce((s, r) => s + r.pages, 0);
+            const totS = rows.reduce((s, r) => s + r.size, 0);
+
+            document.getElementById('date-report-sum').innerHTML = `
+                <div class="rsum-card"><div class="rsum-label">📅 Total Days</div><div class="rsum-val">${rows.length}</div></div>
+                <div class="rsum-card"><div class="rsum-label">📄 Total Files</div><div class="rsum-val">${totF}</div></div>
+                <div class="rsum-card"><div class="rsum-label">📑 Total Pages</div><div class="rsum-val">${totP.toLocaleString()}</div></div>
+            `;
+
+            document.getElementById('date-report-tbody').innerHTML = rows.length ? rows.map(r => `
+                <tr>
+                    <td><b>${r.date}</b></td>
+                    <td>${r.files.length}</td>
+                    <td>${r.pages.toLocaleString()}</td>
+                    <td>${formatSize(r.size)}</td>
+                    <td>${r.users.size}</td>
+                    <td>
+                        <button class="btn btn-info btn-xs" onclick="toggleDateFiles('date-files-${r.date.replace(/-/g, '')}')">📂 View Files</button>
+                    </td>
+                </tr>
+                <tr id="date-files-${r.date.replace(/-/g, '')}" style="display:none">
+                    <td colspan="6" style="padding:0 14px 14px;">
+                        <div style="background:var(--blue-xl);border-radius:10px;padding:12px;border:1.5px solid var(--border2);">
+                            <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📄 Files uploaded on ${r.date}</div>
+                            ${r.files.map(f => `
+                                <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#fff;border-radius:8px;margin-bottom:6px;border:1px solid var(--border2);">
+                                    <span style="font-size:18px;">📄</span>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.fileName}</div>
+                                        <div style="font-size:11px;color:var(--muted);">${USERS[f.userId]?.displayName || f.userId} · ${f.pages} pages · ${formatSize(f.fileSize)} · ${f.uploadTime}</div>
+                                    </div>
+                                    ${f.pdfData
+                    ? `<button class="btn btn-info btn-xs" onclick="openPdfViewer('${f.id}',1,'${escHtml(f.fileName)}')">👁️ View PDF</button>`
+                    : `<span style="font-size:11px;color:var(--muted);">No data</span>`}
+                                    <button class="btn btn-danger btn-xs" onclick="promptDelete('${f.id}','${escHtml(f.fileName)}')">🗑️</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px">No data for selected range</td></tr>';
+        }
+
+        function toggleDateFiles(rowId) {
+            const row = document.getElementById(rowId);
+            if (!row) return;
+            row.style.display = row.style.display === 'none' ? '' : 'none';
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // FILE-WISE REPORT
+        // ══════════════════════════════════════════════════════════
+        function loadFileReport() {
+            const search = document.getElementById('fr-search').value.toLowerCase();
+            const from = document.getElementById('fr-from').value;
+            const to = document.getElementById('fr-to').value;
+            const user = document.getElementById('fr-user').value;
+
+            let data = currentUser.role === 'admin' ? [...uploads] : uploads.filter(u => u.userId === currentUser.username);
+            if (user) data = data.filter(u => u.userId === user);
+            if (from) data = data.filter(u => u.uploadDate >= from);
+            if (to) data = data.filter(u => u.uploadDate <= to);
+            if (search) data = data.filter(u => u.fileName.toLowerCase().includes(search));
+            data.sort((a, b) => new Date(b.uploadDateTime) - new Date(a.uploadDateTime));
+
+            const totP = data.reduce((s, u) => s + u.pages, 0);
+            const totS = data.reduce((s, u) => s + u.fileSize, 0);
+
+            document.getElementById('file-report-sum').innerHTML = `
+                <div class="rsum-card"><div class="rsum-label">📄 Files</div><div class="rsum-val">${data.length}</div></div>
+                <div class="rsum-card"><div class="rsum-label">📑 Total Pages</div><div class="rsum-val">${totP.toLocaleString()}</div></div>
+                <div class="rsum-card"><div class="rsum-label">💾 Total Size</div><div class="rsum-val">${formatSize(totS)}</div></div>
+            `;
+
+            document.getElementById('file-report-tbody').innerHTML = data.length ? data.map((u, i) => `
+                <tr>
+                    <td style="color:var(--muted)">${i + 1}</td>
+                    <td>📄 ${u.fileName}</td>
+                    <td><span class="tag ${u.userId === 'admin' ? 'tag-admin' : 'tag-user'}">${USERS[u.userId]?.displayName || u.userId}</span></td>
+                    <td><b>${u.pages}</b></td>
+                    <td>${formatSize(u.fileSize)}</td>
+                    <td>${u.uploadDate} ${u.uploadTime}</td>
+                    <td>
+                        ${u.pdfData
+                    ? `<button class="btn btn-info btn-xs" onclick="openPdfViewer('${u.id}',1,'${escHtml(u.fileName)}')">👁️ View PDF</button>`
+                    : `<span style="font-size:11px;color:var(--muted);">No stored data</span>`}
+                    </td>
+                    <td>
+                        <button class="btn btn-danger btn-xs" onclick="promptDelete('${u.id}','${escHtml(u.fileName)}')">🗑️ Delete</button>
+                    </td>
+                </tr>
+            `).join('') : '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:32px">No files found</td></tr>';
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // USER-WISE REPORT
+        // ══════════════════════════════════════════════════════════
+        function loadUserReport() {
+            const from = document.getElementById('ur-from').value;
+            const to = document.getElementById('ur-to').value;
+            document.getElementById('user-report-tbody').innerHTML = Object.entries(USERS).map(([uid, udata]) => {
+                let data = uploads.filter(u => u.userId === uid);
+                if (from) data = data.filter(u => u.uploadDate >= from);
+                if (to) data = data.filter(u => u.uploadDate <= to);
+                const pages = data.reduce((s, u) => s + u.pages, 0);
+                const size = data.reduce((s, u) => s + u.fileSize, 0);
+                const last = data.length ? [...data].sort((a, b) => new Date(b.uploadDateTime) - new Date(a.uploadDateTime))[0].uploadDate : '—';
+                return `<tr>
+                    <td><b>${udata.displayName}</b><br><span style="font-size:11px;color:var(--muted)">${uid}</span></td>
+                    <td><span class="tag ${udata.role === 'admin' ? 'tag-admin' : 'tag-user'}">${udata.role}</span></td>
+                    <td>${data.length}</td>
+                    <td>${pages.toLocaleString()}</td>
+                    <td>${formatSize(size)}</td>
+                    <td>${last}</td>
+                    <td><span class="badge ${udata.enabled ? 'badge-green' : 'badge-red'}">${udata.enabled ? '✅ Active' : '🔒 Disabled'}</span></td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // MANAGE USERS
+        // ══════════════════════════════════════════════════════════
+        function loadUsersPage() {
+            document.getElementById('users-tbody').innerHTML = Object.entries(USERS).map(([uid, udata]) => {
+                const files = uploads.filter(u => u.userId === uid).length;
+                const pages = uploads.filter(u => u.userId === uid).reduce((s, u) => s + u.pages, 0);
+                const isAdmin = udata.role === 'admin';
+                return `<tr>
+                    <td><div style="font-weight:600">${udata.displayName}</div><div style="font-size:12px;color:var(--muted)">${uid}</div></td>
+                    <td><span class="tag ${isAdmin ? 'tag-admin' : 'tag-user'}">${udata.role}</span></td>
+                    <td>${files}</td>
+                    <td>${pages.toLocaleString()}</td>
+                    <td><span class="badge ${udata.enabled ? 'badge-green' : 'badge-red'}">${udata.enabled ? '✅ Active' : '🔒 Disabled'}</span></td>
+                    <td>
+                        <div style="display:flex;gap:5px">
+                            <button class="btn btn-sm btn-outline" onclick="openUserEdit('${uid}')">✏️ Edit</button>
+                            ${isAdmin ? '' : `<button class="btn btn-sm ${udata.enabled ? 'btn-danger' : 'btn-success'}" onclick="toggleUser('${uid}')">${udata.enabled ? '🔒' : '✅'}</button>`}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function toggleUser(uid) {
+            if (uid === 'admin') return;
+            USERS[uid].enabled = !USERS[uid].enabled;
+            await saveData();
+            loadUsersPage();
+            showToast(`${USERS[uid].displayName} ${USERS[uid].enabled ? 'enabled' : 'disabled'}!`);
+        }
+
+        function openUserEdit(uid) {
+            const u = USERS[uid]; if (!u) return;
+            document.getElementById('edit-user-title').textContent = `Edit Account: ${uid}`;
+            document.getElementById('edit-displayname').value = u.displayName;
+            document.getElementById('edit-username').value = uid;
+            document.getElementById('edit-password').value = '';
+            document.getElementById('edit-role').value = u.role;
+            document.getElementById('edit-old-username').value = uid;
+            document.getElementById('edit-user-modal').style.display = 'flex';
+        }
+
+        function closeUserEdit() { document.getElementById('edit-user-modal').style.display = 'none'; }
+
+        async function saveUserEdit() {
+            const oldUn = document.getElementById('edit-old-username').value;
+            const newUn = document.getElementById('edit-username').value.trim();
+            const dn = document.getElementById('edit-displayname').value.trim();
+            const pw = document.getElementById('edit-password').value;
+            const rl = document.getElementById('edit-role').value;
+            if (!dn || !newUn) { showToast('Required fields missing', 'err'); return; }
+            if (newUn !== oldUn && USERS[newUn]) { showToast('Username already taken', 'err'); return; }
+            const userData = { ...USERS[oldUn], displayName: dn, role: rl };
+            if (pw) userData.password = pw;
+            if (newUn !== oldUn) {
+                delete USERS[oldUn]; USERS[newUn] = userData;
+                await updateUsernameInUploads(oldUn, newUn);
+                if (currentUser.username === oldUn) currentUser.username = newUn;
+            } else { USERS[oldUn] = userData; }
+            if (currentUser.username === newUn) { currentUser.displayName = dn; currentUser.role = rl; }
+            await saveData();
+            closeUserEdit();
+            await initApp();
+            showToast('✅ User updated!');
+        }
+
+        async function updateUsernameInUploads(oldId, newId) {
+            uploads.forEach(u => { if (u.userId === oldId) u.userId = newId; });
+            await saveData();
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // PROFILE
+        // ══════════════════════════════════════════════════════════
+        function loadProfilePage() {
+            document.getElementById('prof-displayname').value = currentUser.displayName;
+            document.getElementById('prof-username').value = currentUser.username;
+            document.getElementById('prof-password').value = '';
+            document.getElementById('prof-confirm').value = '';
+        }
+
+        async function updateProfile() {
+            const dn = document.getElementById('prof-displayname').value.trim();
+            const un = document.getElementById('prof-username').value.trim();
+            const pw = document.getElementById('prof-password').value;
+            const cf = document.getElementById('prof-confirm').value;
+            if (!dn || !un) { showToast('Required fields missing', 'err'); return; }
+            if (pw && pw !== cf) { showToast('Passwords do not match', 'err'); return; }
+            if (un !== currentUser.username && USERS[un]) { showToast('Username already taken', 'err'); return; }
+            const oldUsername = currentUser.username;
+            const userData = { ...USERS[oldUsername], displayName: dn };
+            if (pw) userData.password = pw;
+            if (un !== oldUsername) {
+                delete USERS[oldUsername]; USERS[un] = userData;
+                await updateUsernameInUploads(oldUsername, un);
+                currentUser.username = un;
+            } else { USERS[oldUsername] = userData; }
+            currentUser.displayName = dn;
+            await saveData();
+            await initApp();
+            showToast('✅ Profile updated!');
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // EXPORT EXCEL
+        // ══════════════════════════════════════════════════════════
+        function exportExcel(type) {
+            let data = [], headers = [], filename = '';
+            const from = document.getElementById(type === 'date' ? 'dr-from' : type === 'file' ? 'fr-from' : 'ur-from')?.value;
+            const to = document.getElementById(type === 'date' ? 'dr-to' : type === 'file' ? 'fr-to' : 'ur-to')?.value;
+            let source = currentUser.role === 'admin' ? [...uploads] : uploads.filter(u => u.userId === currentUser.username);
+            if (from) source = source.filter(u => u.uploadDate >= from);
+            if (to) source = source.filter(u => u.uploadDate <= to);
+
+            if (type === 'file') {
+                source.sort((a, b) => new Date(a.uploadDateTime) - new Date(b.uploadDateTime));
+                headers = ['#', 'File Name', 'Uploaded By', 'Total Pages', 'File Size', 'Upload Date', 'Upload Time'];
+                data = source.map((u, i) => [i + 1, u.fileName, USERS[u.userId]?.displayName || u.userId, u.pages, formatSize(u.fileSize), u.uploadDate, u.uploadTime]);
+                filename = `Scanning_Report_Filewise_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            } else if (type === 'date') {
+                const byDate = {};
+                source.forEach(u => {
+                    if (!byDate[u.uploadDate]) byDate[u.uploadDate] = { date: u.uploadDate, files: 0, pages: 0, size: 0, users: new Set() };
+                    byDate[u.uploadDate].files++; byDate[u.uploadDate].pages += u.pages; byDate[u.uploadDate].size += u.fileSize; byDate[u.uploadDate].users.add(u.userId);
+                });
+                const sorted = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+                headers = ['Date', 'Files Uploaded', 'Total Pages', 'Total Size', 'Active Users'];
+                data = sorted.map(r => [r.date, r.files, r.pages, formatSize(r.size), r.users.size]);
+                filename = `Scanning_Report_Datewise_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            } else {
+                headers = ['Username', 'Full Name', 'Role', 'Status', 'Files', 'Pages', 'Size'];
+                data = Object.entries(USERS).map(([uid, udata]) => {
+                    let d = uploads.filter(u => u.userId === uid);
+                    if (from) d = d.filter(u => u.uploadDate >= from);
+                    if (to) d = d.filter(u => u.uploadDate <= to);
+                    return [uid, udata.displayName, udata.role.toUpperCase(), udata.enabled ? 'ACTIVE' : 'DISABLED', d.length, d.reduce((s, u) => s + u.pages, 0), formatSize(d.reduce((s, u) => s + u.fileSize, 0))];
+                });
+                filename = `Scanning_Report_Userwise_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            }
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+            ws['!cols'] = headers.map((h, i) => { let m = h.length; data.forEach(r => { const v = String(r[i] || ''); if (v.length > m) m = v.length; }); return { wch: m + 5 }; });
+            XLSX.utils.book_append_sheet(wb, ws, 'Scanning Report');
+            XLSX.writeFile(wb, filename);
+            showToast(`📈 Excel exported: ${filename}`);
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // HELPERS
+        // ══════════════════════════════════════════════════════════
+        function populateUserDropdowns() {
+            const opts = ['<option value="">All Users</option>', ...Object.entries(USERS).map(([k, v]) => `<option value="${k}">${v.displayName} (${k})</option>`)].join('');
+            ['dr-user', 'fr-user'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
+        }
+
+        function formatSize(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024, sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+        }
+
+        function escHtml(str) {
+            return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        function showToast(msg, type = '') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'show' + (type ? ' ' + type : '');
+            setTimeout(() => { t.className = ''; }, 3000);
+        }
+
+        // ══════════════════════════════════════════════════════════
+        // SESSION RECOVERY
+        // ══════════════════════════════════════════════════════════
+        async function recoverSession() {
+            const session = localStorage.getItem('mv_session');
+            if (session) {
+                try {
+                    currentUser = JSON.parse(session);
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('app').style.display = 'block';
+                    const savedIp = localStorage.getItem('mv_server_url');
+                    if (savedIp) {
+                        SERVER_URL = savedIp;
+                        const ipPart = savedIp.replace('http://', '').replace(':3000', '');
+                        document.getElementById('server-ip').value = ipPart;
+                    }
+                    await initApp();
+                } catch (e) { localStorage.removeItem('mv_session'); }
+            } else {
+                const savedIp = localStorage.getItem('mv_server_url');
+                if (savedIp) {
+                    const ipPart = savedIp.replace('http://', '').replace(':3000', '');
+                    document.getElementById('server-ip').value = ipPart;
+                    SERVER_URL = savedIp;
+                }
+            }
+        }
+
+        recoverSession();
+
+        window.addEventListener('load', () => {
+            setTimeout(checkServer, 800);
+        });
+    </script>
+</body>
+
+ </html>
